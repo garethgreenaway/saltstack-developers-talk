@@ -12,10 +12,7 @@ Module for controlling the Blinkt LED matrix
 
 from __future__ import absolute_import, unicode_literals, print_function
 
-import colorsys
 import logging
-import time
-import random
 
 try:
     import blinkt
@@ -35,7 +32,7 @@ def __virtual__():
         return False, "The blinkt excecution module can not be loaded."
 
 
-def random_colors():
+def random_colors(timeout=None):
     '''
     Set the LEDs to random colors
 
@@ -46,17 +43,18 @@ def random_colors():
         salt '*' blinkt.random_colors
 
     '''
-    blinkt.set_clear_on_exit()
-    blinkt.set_brightness(0.1)
+    try:
+        res = __salt__['event.fire']({'mode': 'random_blink_colors',
+                                      'kwargs': {'timeout': timeout}},
+                                     '/salt/minion/blinkt')
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret = {}
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+        return ret
 
-    for i in range(blinkt.NUM_PIXELS):
-        blinkt.set_pixel(i, random.randint(0, 255),
-                         random.randint(0, 255),
-                         random.randint(0, 255))
-    blinkt.show()
-
-
-def rainbow():
+def rainbow(timeout=None):
     '''
     Set the LEDs to the colors of the rainbow
 
@@ -67,22 +65,19 @@ def rainbow():
         salt '*' blinkt.rainbow
 
     '''
-    spacing = 360.0 / 16.0
-    hue = 0
-
-    blinkt.set_clear_on_exit()
-    blinkt.set_brightness(0.1)
-
-    hue = int(time.time() * 100) % 360
-    for x in range(blinkt.NUM_PIXELS):
-        offset = x * spacing
-        h = ((hue + offset) % 360) / 360.0
-        r, g, b = [int(c*255) for c in colorsys.hsv_to_rgb(h, 1.0, 1.0)]
-        blinkt.set_pixel(x, r, g, b)
-    blinkt.show()
+    try:
+        res = __salt__['event.fire']({'mode': 'rainbow',
+                                      'kwargs': {'timeout': timeout}},
+                                     '/salt/minion/blinkt')
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret = {}
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+        return ret
 
 
-def one_rgb(pixel=0, red=0, green=0, blue=0):
+def one_rgb(pixel=0, red=0, green=0, blue=0, timeout=None):
     '''
     Set the one LED to a color
 
@@ -96,11 +91,23 @@ def one_rgb(pixel=0, red=0, green=0, blue=0):
     if pixel > blinkt.NUM_PIXELS:
         return False, 'Invalid pixel'
 
-    blinkt.set_pixel(pixel, red, green, blue)
-    blinkt.show()
+    try:
+        res = __salt__['event.fire']({'mode': 'one_rgb',
+                                      'kwargs': {'pixel': pixel,
+                                                 'red': red,
+                                                 'green': green,
+                                                 'blue': blue,
+                                                 'timeout': timeout}},
+                                     '/salt/minion/blinkt')
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret = {}
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+        return ret
 
 
-def range_rgb(start=0, end=1, red=255, green=255, blue=255):
+def range_rgb(start=0, end=1, red=255, green=255, blue=255, timeout=None):
     '''
     Set a range of LEDs to a color
 
@@ -117,12 +124,24 @@ def range_rgb(start=0, end=1, red=255, green=255, blue=255):
     if end > blinkt.NUM_PIXELS:
         return False, 'Invalid end pixel'
 
-    for pixel in range(start, end + 1):
-        blinkt.set_pixel(pixel, red, green, blue)
-        blinkt.show()
+    try:
+        res = __salt__['event.fire']({'mode': 'range_rgb',
+                                      'kwargs': {'start_pixel': start,
+                                                 'end_pixel': end,
+                                                 'red': red,
+                                                 'green': green,
+                                                 'blue': blue,
+                                                 'timeout': timeout}},
+                                     '/salt/minion/blinkt')
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret = {}
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+        return ret
 
 
-def all_rgb(red=255, green=255, blue=255):
+def all_rgb(red=255, green=255, blue=255, timeout=None):
     '''
     Set all the LEDs to a color
 
@@ -133,8 +152,20 @@ def all_rgb(red=255, green=255, blue=255):
         salt '*' blinkt.all_rgb red=0 green=255 blue=0
 
     '''
-    blinkt.set_all(red, green, blue)
-    blinkt.show()
+    ret = {}
+    try:
+        res = __salt__['event.fire']({'mode': 'all_rgb',
+                                      'kwargs': {'red': red,
+                                                 'green': green,
+                                                 'blue': blue,
+                                                 'timeout': timeout}},
+                                     '/salt/minion/blinkt')
+        ret['comment'] = res
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+    return ret
 
 
 def clear(**kwargs):
@@ -152,41 +183,11 @@ def clear(**kwargs):
         salt '*' blinkt.clear
 
     '''
-    if 'pixel' in kwargs:
-        clear_one(kwargs['pixel'])
-    elif 'start' in kwargs and 'end' in kwargs:
-        clear_range(kwargs['start'], kwargs['end'])
-    else:
-        blinkt.set_all(0, 0, 0)
-        blinkt.show()
-
-
-def clear_one(self, pixel):
-    '''
-    Clear one pixel
-
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt '*' blinkt.clear_one 5
-
-    '''
-    blinkt.set_pixel(pixel, 0, 0, 0)
-    blinkt.show()
-
-
-def clear_range(self, start_pixel, end_pixel):
-    '''
-    Clear one pixel
-
-    CLI Example:
-
-    .. code-block:: bash
-
-        salt '*' blinkt.clear_range 2 6
-
-    '''
-    for pixel in range(start_pixel, end_pixel + 1):
-        blinkt.set_pixel(pixel, 0, 0, 0)
-    blinkt.show()
+    try:
+        res = __salt__['event.fire']({'mode': 'clear', 'kwargs': kwargs}, '/salt/minion/blinkt')
+    except KeyError:
+        # Effectively a no-op, since we can't really return without an event system
+        ret = {}
+        ret['comment'] = 'Event module not available.'
+        ret['result'] = True
+        return ret
