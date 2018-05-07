@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: salt-minion-
+spec:
+  containers:
+  - name: salt-minion
+    image: garethgreenaway/ubuntu_systemd_saltminion:latest
+    securityContext:
+      privileged: True
+      allowPrivilegeEscalation: True
