@@ -144,7 +144,7 @@ def all_rgb(red=255, green=255, blue=255):
     blinkt.set_all(red, green, blue)
     blinkt.show()
     return {'result': True,
-            'comment': 'Set all pixels to rgb ({1},{2},{3})'.format(red, green, blue)}
+            'comment': 'Set all pixels to rgb ({0},{1},{2})'.format(red, green, blue)}
 
 
 def clear(**kwargs):
