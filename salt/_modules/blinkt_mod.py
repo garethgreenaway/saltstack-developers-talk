@@ -208,6 +208,6 @@ def clear_range(start_pixel, end_pixel):
     for pixel in range(start_pixel, end_pixel + 1):
         blinkt.set_pixel(pixel, 0, 0, 0)
     blinkt.show()
-    comment = 'Clear pixel range {0}-{1}'.format(start_pixel, end_pixel]
+    comment = 'Clear pixel range {0}-{1}'.format(start_pixel, end_pixel)
     return {'result': True,
             'comment': comment}
