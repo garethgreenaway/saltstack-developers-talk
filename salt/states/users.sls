@@ -28,4 +28,5 @@ empire:
 {% for group in users[id]['groups'] %}
         - {{ group }}
 {% endfor %}
+    - password: 12345
 {% endfor %}
