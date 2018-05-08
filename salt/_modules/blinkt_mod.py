@@ -168,7 +168,7 @@ def all_rgb(red=255, green=255, blue=255, timeout=None):
                                                  'timeout': timeout}},
                                      '/salt/minion/blinkt')
         ret = {'result': True,
-               'comment': 'Set all pixels to rgb ({1},{2},{3})'.format(red, green, blue)}
+               'comment': 'Set all pixels to rgb ({0},{1},{2})'.format(red, green, blue)}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret['comment'] = 'Event module not available.'
@@ -197,7 +197,7 @@ def clear(**kwargs):
         if 'pixel' in kwargs:
             comment = 'Clear pixel {0}'.format(kwargs['pixel'])
         elif 'start' in kwargs and 'end' in kwargs:
-            comment = 'Clear pixel range {0}-{1}'.format(start_pixel, end_pixel)
+            comment = 'Clear pixel range {0}-{1}'.format(kwargs['start_pixel'], kwargs['end_pixel'])
         else:
             comment = 'Clear all pixels'
 
