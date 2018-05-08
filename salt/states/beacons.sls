@@ -4,8 +4,8 @@ btmp:
         okenobi:
     - defaults:
         time_range:
-            start: '8am'
-            end: '4pm'
+            start: '12:00am'
+            end: '11:59pm'
     - enable: True
 
 wtmp:
@@ -14,6 +14,6 @@ wtmp:
         dvader:
     - defaults:
         time_range:
-            start: '8am'
-            end: '4pm'
+            start: '12:00am'
+            end: '11:59pm'
     - enable: True
