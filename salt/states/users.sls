@@ -29,4 +29,5 @@ empire:
         - {{ group }}
 {% endfor %}
     - password: '12345'
+    - hash_password: True
 {% endfor %}
