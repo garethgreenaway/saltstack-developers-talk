@@ -2,9 +2,9 @@
 
 def run():
 
-    kwargs = {'r': 255,
-              'b': 0,
-              'g': 0,
+    kwargs = {'red': 255,
+              'blue': 0,
+              'green': 0,
               }
 
     return {
