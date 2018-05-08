@@ -6,7 +6,7 @@ def run():
     kwargs = {'start': 0,
               'end': 1,
               'red': 0,
-              'blule': 255,
+              'blue': 255,
               'green': 0,
               'timeout': 30}
 
