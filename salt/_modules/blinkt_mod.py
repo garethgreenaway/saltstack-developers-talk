@@ -14,6 +14,8 @@ from __future__ import absolute_import, unicode_literals, print_function
 
 import logging
 
+__virtualname__ = 'blinkt'
+
 try:
     import blinkt
     HAS_BLINKT = True
@@ -27,9 +29,8 @@ def __virtual__():
     Only load the module if Blinkt is available
     '''
     if HAS_BLINKT:
-        return True
-    else:
-        return False, "The blinkt excecution module can not be loaded."
+        return __virtualname__
+    return False, "The blinkt excecution module can not be loaded."
 
 
 def random_colors(timeout=None):
@@ -47,12 +48,14 @@ def random_colors(timeout=None):
         res = __salt__['event.fire']({'mode': 'random_blink_colors',
                                       'kwargs': {'timeout': timeout}},
                                      '/salt/minion/blinkt')
+        ret = {'result': True, 'comment': 'Set LEDs to random colors'}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret = {}
         ret['comment'] = 'Event module not available.'
         ret['result'] = True
-        return ret
+    return ret
+
 
 def rainbow(timeout=None):
     '''
@@ -69,12 +72,13 @@ def rainbow(timeout=None):
         res = __salt__['event.fire']({'mode': 'rainbow',
                                       'kwargs': {'timeout': timeout}},
                                      '/salt/minion/blinkt')
+        ret = {'result': True, 'comment': 'Set LEDs to rainbow'}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret = {}
         ret['comment'] = 'Event module not available.'
         ret['result'] = True
-        return ret
+    return ret
 
 
 def one_rgb(pixel=0, red=0, green=0, blue=0, timeout=None):
@@ -99,12 +103,14 @@ def one_rgb(pixel=0, red=0, green=0, blue=0, timeout=None):
                                                  'blue': blue,
                                                  'timeout': timeout}},
                                      '/salt/minion/blinkt')
+        ret = {'result': True,
+               'comment': 'Set pixel {0} to rgb ({1},{2},{3})'.format(pixel, red, green, blue)}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret = {}
         ret['comment'] = 'Event module not available.'
         ret['result'] = True
-        return ret
+    return ret
 
 
 def range_rgb(start=0, end=1, red=255, green=255, blue=255, timeout=None):
@@ -133,12 +139,14 @@ def range_rgb(start=0, end=1, red=255, green=255, blue=255, timeout=None):
                                                  'blue': blue,
                                                  'timeout': timeout}},
                                      '/salt/minion/blinkt')
+        ret = {'result': True,
+               'comment': 'Set range {0}-{1} to rgb ({2},{3},{4})'.format(start, end, red, green, blue)}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret = {}
         ret['comment'] = 'Event module not available.'
         ret['result'] = True
-        return ret
+    return ret
 
 
 def all_rgb(red=255, green=255, blue=255, timeout=None):
@@ -152,7 +160,6 @@ def all_rgb(red=255, green=255, blue=255, timeout=None):
         salt '*' blinkt.all_rgb red=0 green=255 blue=0
 
     '''
-    ret = {}
     try:
         res = __salt__['event.fire']({'mode': 'all_rgb',
                                       'kwargs': {'red': red,
@@ -160,7 +167,8 @@ def all_rgb(red=255, green=255, blue=255, timeout=None):
                                                  'blue': blue,
                                                  'timeout': timeout}},
                                      '/salt/minion/blinkt')
-        ret['comment'] = res
+        ret = {'result': True,
+               'comment': 'Set all pixels to rgb ({0},{1},{2})'.format(red, green, blue)}
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret['comment'] = 'Event module not available.'
@@ -185,9 +193,21 @@ def clear(**kwargs):
     '''
     try:
         res = __salt__['event.fire']({'mode': 'clear', 'kwargs': kwargs}, '/salt/minion/blinkt')
+
+        if 'pixel' in kwargs:
+            comment = 'Clear pixel {0}'.format(kwargs['pixel'])
+        elif 'start' in kwargs and 'end' in kwargs:
+            comment = 'Clear pixel range {0}-{1}'.format(kwargs['start_pixel'], kwargs['end_pixel'])
+        else:
+            comment = 'Clear all pixels'
+
+        ret = {'result': True,
+               'comment': comment}
+
     except KeyError:
         # Effectively a no-op, since we can't really return without an event system
         ret = {}
         ret['comment'] = 'Event module not available.'
         ret['result'] = True
-        return ret
+
+    return ret
