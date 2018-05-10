@@ -75,6 +75,26 @@ def _query(action=None,
         log.error(result['error'])
         return [result['status'], result['error']]
 
+    _results = []
+    _results.append(result['dict'])
+    log.debug('=== result %s ===', result)
+    while 'next' in result['dict']:
+        result = salt.utils.http.query(
+            result['dict']['next'],
+            method,
+            params=args,
+            data=data,
+            header_dict=header_dict,
+            decode=decode,
+            decode_type='json',
+            text=True,
+            status=True,
+            cookies=True,
+            persist_session=True,
+            opts=__opts__,
+        )
+        _results.append(result['dict']['results'])
+    log.debug('=== _results %s ===', _results)
     return [result['status'], result.get('dict', {})]
 
 
