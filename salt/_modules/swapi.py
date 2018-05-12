@@ -76,9 +76,11 @@ def _query(action=None,
         return [result['status'], result['error']]
 
     _results = []
-    _results.append(result['dict'])
-    log.debug('=== result %s ===', result)
-    while 'next' in result['dict']:
+    if 'results' in result['dict']:
+        _results = result['dict']['results']
+    else:
+        _results.append(result['dict'])
+    while 'next' in result['dict'] and result['dict']['next']:
         result = salt.utils.http.query(
             result['dict']['next'],
             method,
@@ -93,9 +95,9 @@ def _query(action=None,
             persist_session=True,
             opts=__opts__,
         )
-        _results.append(result['dict']['results'])
-    log.debug('=== _results %s ===', _results)
-    return [result['status'], result.get('dict', {})]
+        _results.extend(result['dict']['results'])
+    #return [result['status'], result.get('dict', {})]
+    return [result['status'], _results]
 
 
 def people(id_key=None, **kwargs):
