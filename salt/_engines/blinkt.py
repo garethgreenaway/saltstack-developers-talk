@@ -145,7 +145,7 @@ class BlinktEngine(object):
         red = kwargs.get('red')
         green = kwargs.get('green')
         blue = kwargs.get('blue')
-        blinkt.set_all(r, g, b)
+        blinkt.set_all(red, green, blue)
         blinkt.show()
 
     def clear(self, **kwargs):
