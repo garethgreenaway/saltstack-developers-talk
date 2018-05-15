@@ -4,7 +4,7 @@ my-nginx:
   kubernetes.deployment_present:
     - namespace: default
       spec:
-        replicas: {{ range(2, 15) | random }}
+        replicas: {{ range(2, 40) | random }}
         template:
           metadata:
             labels:
