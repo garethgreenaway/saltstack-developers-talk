@@ -1,15 +1,15 @@
 #
-# add groups
+# remove groups
 #
 
 rebels:
-  group.present
+  group.absent
 
 empire:
-  group.present
+  group.absent
 
 #
-# add users
+# remove users
 #
 
 {% set users = {'10': {'groups': ['rebels']},
@@ -22,12 +22,5 @@ empire:
 {% set username = username_parts[0]|first|lower + username_parts[1]|lower %}
 
 {{ username }}:
-  user.present:
-    - fullname: {{ user['name'] }}
-    - groups:
-{% for group in users[id]['groups'] %}
-        - {{ group }}
-{% endfor %}
-    - password: {{ salt['pillar.get']('super_secure_password', '12345') }}
-    - hash_password: True
+  user.absent
 {% endfor %}
