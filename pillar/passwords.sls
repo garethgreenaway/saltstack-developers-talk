@@ -1,1 +1,1 @@
-super_secure_password: '12345'
+super_secure_password: 'password'
