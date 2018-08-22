@@ -13,7 +13,6 @@ Engine for controlling Dashing
 from __future__ import absolute_import, print_function, unicode_literals
 import datetime
 import logging
-import random
 import urllib
 
 # Import salt libs
@@ -26,9 +25,7 @@ def __virtual__():
     '''
     Only load the module if Blinkt is available
     '''
-    if HAS_BLINKT:
-        return True
-    return False
+    return True
 
 
 class DashingEngine(object):
@@ -121,26 +118,33 @@ class DashingEngine(object):
                 listen=True)
 
         _kwargs = {}
+        post = None
         while True:
             now = datetime.datetime.now()
             event = event_bus.get_event(full=True)
             if event:
                 if 'tag' in event:
                     if event['tag'].startswith('/salt/minion/dashing'):
+                        post = True
                         _kwargs = event['data'].get('kwargs', {})
                         if _kwargs.get('timeout', None):
                             self.stop_time = now + datetime.timedelta(seconds=_kwargs.get('timeout'))
 
+            if post:
                 self.widget_post(**_kwargs)
                 if self.stop_time:
                     if self.stop_time <= now:
                         self.clear(**_kwargs)
+                        post = None
+                else:
+                    post = None
 
     def widget_post(self,
                     dashing_url=None,
                     token=None,
                     widget=None,
-                    widget_data=None):
+                    widget_data=None,
+                    **kwargs):
         '''
         Get key from Consul
 

@@ -24,11 +24,7 @@ def __virtual__():
     return True
 
 
-def widget_post(dashing_url=None,
-                token=None,
-                widget=None,
-                widget_data=None,
-                timeout=None):
+def widget_post(**kwargs):
     '''
     Get key from Consul
 
