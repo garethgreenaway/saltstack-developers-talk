@@ -13,10 +13,12 @@ Engine for controlling Dashing
 from __future__ import absolute_import, print_function, unicode_literals
 import datetime
 import logging
-import urllib
+
 
 # Import salt libs
 import salt.utils.event
+from salt.ext import six
+from salt.ext.six.moves import http_client, urllib
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +36,6 @@ class DashingEngine(object):
     '''
     def __init__(self):
         self.stop_time = None
-        self.stop_times = {}
 
     def _get_config(self):
         '''
@@ -116,28 +117,26 @@ class DashingEngine(object):
                 listen=True)
 
         _kwargs = {}
+        post = None
         while True:
             now = datetime.datetime.now()
             event = event_bus.get_event(full=True)
             if event:
                 if 'tag' in event:
                     if event['tag'].startswith('/salt/minion/dashing'):
+                        post = True
                         _kwargs = event['data'].get('kwargs', {})
                         if _kwargs.get('timeout', None):
                             self.stop_time = now + datetime.timedelta(seconds=_kwargs.get('timeout'))
 
-                            for widget in _kwargs.get('widget_data', {}):
-                                self.stop_times[widget] = now + datetime.timedelta(seconds=_kwargs.get('timeout'))
-
-                        self.widget_post(**_kwargs)
-
-            for widget in self.stop_times:
-                log.debug(self.stop_times[widget])
-                if self.stop_times[widget]:
-                    if self.stop_times[widget] <= now:
-                        self.clear(widget=_kwargs['widget'],
-                                   widget_data={widget: '1'})
-                        self.stop_times[widget] = None
+            if post:
+                self.widget_post(**_kwargs)
+                if self.stop_time:
+                    if self.stop_time <= now:
+                        self.clear(**_kwargs)
+                        post = None
+                else:
+                    post = None
 
     def widget_post(self,
                     dashing_url=None,
@@ -202,7 +201,9 @@ class DashingEngine(object):
         '''
         Clear one pixel, a range of pixels or all pixels
         '''
-        log.debug(kwargs)
+        if 'widget_data' in kwargs:
+            for key in kwargs['widget_data']:
+                kwargs['widget_data'][key] = 1
         self.widget_post(**kwargs)
 
 
