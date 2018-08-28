@@ -13,10 +13,12 @@ Engine for controlling Dashing
 from __future__ import absolute_import, print_function, unicode_literals
 import datetime
 import logging
-import urllib
+
 
 # Import salt libs
 import salt.utils.event
+from salt.ext import six
+from salt.ext.six.moves import http_client, urllib
 
 log = logging.getLogger(__name__)
 
@@ -73,9 +75,6 @@ class DashingEngine(object):
 
         ret = {'data': '',
                'res': True}
-
-        if not token:
-            token = self._get_token()
 
         headers = {"auth_token": token, "Content-Type": "application/json"}
         url = urllib.parse.urljoin(dashing_url, function, False)
@@ -183,6 +182,9 @@ class DashingEngine(object):
                 ret['message'] = 'No Dashing URL found.'
                 ret['res'] = False
                 return ret
+
+        if not token:
+            token = self._get_token()
 
         data = {}
         data['auth_token'] = token
