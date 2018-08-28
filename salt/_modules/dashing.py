@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Module for controlling the Blinkt LED matrix
+Interact with a Dashing dashboard
 
 .. versionadded:: Fluorine
 
@@ -26,33 +26,19 @@ def __virtual__():
 
 def widget_post(**kwargs):
     '''
-    Get key from Consul
+    Post data a Dashing widget
 
-    :param consul_url: The Consul server URL.
-    :param key: The key to use as the starting point for the list.
-    :param recurse: Return values recursively beginning at the value of key.
-    :param decode: By default values are stored as Base64 encoded values,
-                   decode will return the whole key with the value decoded.
-    :param raw: Simply return the decoded value of the key.
-    :return: The keys in Consul.
+    :param dashing_url: The Dashing server URL.
+    :param token: The token to use.
+    :param widget:  The widget to post data to
+    :param widget_data: The data to post to the widget.
+    :return: True
 
     CLI Example:
 
     .. code-block:: bash
 
-        salt '*' consul.get key='web/key1'
-        salt '*' consul.get key='web' recurse=True
-        salt '*' consul.get key='web' recurse=True decode=True
-
-    By default values stored in Consul are base64 encoded, passing the
-    decode option will show them as the decoded values.
-
-    .. code-block:: bash
-
-        salt '*' consul.get key='web' recurse=True decode=True raw=True
-
-    By default Consult will return other information about the key, the raw
-    option will return only the raw value.
+        salt '*' dashing.wdget_post dashing_url="http://localhost:3030" token="YOUR_AUTH_TOKEN" widget="widget_name" widget_data="{'key': 'value'}"
 
     '''
     try:
