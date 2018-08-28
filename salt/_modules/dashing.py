@@ -69,9 +69,6 @@ def _query(function,
     ret = {'data': '',
            'res': True}
 
-    if not token:
-        token = _get_token()
-
     headers = {"auth_token": token, "Content-Type": "application/json"}
     url = urllib.parse.urljoin(dashing_url, function, False)
 
@@ -138,6 +135,9 @@ def widget_post(dashing_url=None,
             ret['message'] = 'No Dashing URL found.'
             ret['res'] = False
             return ret
+
+    if not token:
+        token = _get_token()
 
     data = {}
     data['auth_token'] = token
