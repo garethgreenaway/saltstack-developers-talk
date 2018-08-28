@@ -34,6 +34,7 @@ class DashingEngine(object):
     '''
     def __init__(self):
         self.stop_time = None
+        self.stop_times = {}
 
     def _get_config(self):
         '''
@@ -73,9 +74,6 @@ class DashingEngine(object):
 
         ret = {'data': '',
                'res': True}
-
-        if not token:
-            token = self._get_token()
 
         headers = {"auth_token": token, "Content-Type": "application/json"}
         url = urllib.parse.urljoin(dashing_url, function, False)
@@ -118,26 +116,28 @@ class DashingEngine(object):
                 listen=True)
 
         _kwargs = {}
-        post = None
         while True:
             now = datetime.datetime.now()
             event = event_bus.get_event(full=True)
             if event:
                 if 'tag' in event:
                     if event['tag'].startswith('/salt/minion/dashing'):
-                        post = True
                         _kwargs = event['data'].get('kwargs', {})
                         if _kwargs.get('timeout', None):
                             self.stop_time = now + datetime.timedelta(seconds=_kwargs.get('timeout'))
 
-            if post:
-                self.widget_post(**_kwargs)
-                if self.stop_time:
-                    if self.stop_time <= now:
-                        self.clear(**_kwargs)
-                        post = None
-                else:
-                    post = None
+                            for widget in _kwargs.get('widget_data', {}):
+                                self.stop_times[widget] = now + datetime.timedelta(seconds=_kwargs.get('timeout'))
+
+                        self.widget_post(**_kwargs)
+
+            for widget in self.stop_times:
+                log.debug(self.stop_times[widget])
+                if self.stop_times[widget]:
+                    if self.stop_times[widget] <= now:
+                        self.clear(widget=_kwargs['widget'],
+                                   widget_data={widget: '1'})
+                        self.stop_times[widget] = None
 
     def widget_post(self,
                     dashing_url=None,
@@ -184,6 +184,9 @@ class DashingEngine(object):
                 ret['res'] = False
                 return ret
 
+        if not token:
+            token = self._get_token()
+
         data = {}
         data['auth_token'] = token
         data.update(widget_data)
@@ -199,9 +202,7 @@ class DashingEngine(object):
         '''
         Clear one pixel, a range of pixels or all pixels
         '''
-        if 'widget_data' in kwargs:
-            for key in kwargs['widget_data']:
-                kwargs['widget_data'][key] = 1
+        log.debug(kwargs)
         self.widget_post(**kwargs)
 
 
