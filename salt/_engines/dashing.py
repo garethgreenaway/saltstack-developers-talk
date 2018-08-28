@@ -39,14 +39,14 @@ class DashingEngine(object):
 
     def _get_config(self):
         '''
-        Retrieve Consul configuration
+        Get Dashing configuration
         '''
         return __salt__['config.get']('dashing.url') or \
             __salt__['config.get']('dashing:url')
 
     def _get_token(self):
         '''
-        Retrieve Consul configuration
+        Get Dashing token
         '''
         return __salt__['config.get']('dashing.token') or \
             __salt__['config.get']('dashing:token')
@@ -60,15 +60,16 @@ class DashingEngine(object):
                data=None,
                query_params=None):
         '''
-        Consul object method function to construct and execute on the API URL.
+        Private query function for calling Dashing URL
 
-        :param api_url:     The Consul api url.
-        :param api_version  The Consul api version
-        :param function:    The Consul api function to perform.
+        :param dashing_url: The Dashing api url.
+        :param token        The Dashing tokne
+        :param function:    The Dashing function to perform.
         :param method:      The HTTP method, e.g. GET or POST.
         :param data:        The data to be sent for POST method. This param is ignored for GET requests.
+        :param query_params:  Additional query params.
         :return:            The json response from the API call or False.
-        '''
+            '''
 
         if not query_params:
             query_params = {}
@@ -145,33 +146,13 @@ class DashingEngine(object):
                     widget_data=None,
                     **kwargs):
         '''
-        Get key from Consul
+        Post data a Dashing widget
 
-        :param consul_url: The Consul server URL.
-        :param key: The key to use as the starting point for the list.
-        :param recurse: Return values recursively beginning at the value of key.
-        :param decode: By default values are stored as Base64 encoded values,
-                       decode will return the whole key with the value decoded.
-        :param raw: Simply return the decoded value of the key.
-        :return: The keys in Consul.
-
-        CLI Example:
-
-        .. code-block:: bash
-
-            salt '*' consul.get key='web/key1'
-            salt '*' consul.get key='web' recurse=True
-            salt '*' consul.get key='web' recurse=True decode=True
-
-        By default values stored in Consul are base64 encoded, passing the
-        decode option will show them as the decoded values.
-
-        .. code-block:: bash
-
-            salt '*' consul.get key='web' recurse=True decode=True raw=True
-
-        By default Consult will return other information about the key, the raw
-        option will return only the raw value.
+        :param dashing_url: The Dashing server URL.
+        :param token: The token to use.
+        :param widget:  The widget to post data to
+        :param widget_data: The data to post to the widget.
+        :return: True
 
         '''
         ret = {}
